@@ -1,0 +1,7 @@
+{
+    "name": "appSheet",
+    "icon": "file:appsheet.svg",
+    "version": 1,
+    "inputs": [{ "type": "main" }],
+    "outputs": [{ "type": "main" }]
+}
