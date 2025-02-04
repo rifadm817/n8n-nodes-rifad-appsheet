@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-rifad-appsheet",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "An n8n community node for interacting with the AppSheet API",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,6 @@
     "automation"
   ],
   "author": "Mohammed Rifad <rifadm817@gmail.com>",
-  "license": "MIT",
   "dependencies": {
     "n8n-workflow": "^1.14.0"
   },
