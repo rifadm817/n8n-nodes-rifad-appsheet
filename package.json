@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-rifad-appsheet",
-  "version": "0.2.4",
-  "description": "An n8n community node for interacting with the AppSheet API",
+  "version": "0.2.9",
+  "description": "An n8n community node for interacting with the AppSheet API, including an AI Agent tool node",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc"
@@ -13,6 +13,7 @@
     "automation"
   ],
   "author": "Mohammed Rifad <rifadm817@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "n8n-workflow": "^1.14.0"
   },
@@ -21,17 +22,18 @@
     "typescript": "^5.0.0"
   },
   "n8n": {
-  "credentials": [
-    "dist/credentials/AppSheetApi.credentials.js"
-  ],
-  "nodes": [
-    "dist/nodes/AppSheet/AppSheet.node.js"
-  ]
-},
+    "credentials": [
+      "dist/credentials/AppSheetApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/AppSheet/AppSheet.node.js",
+      "dist/nodes/AppSheet/AIAgentAppSheet.node.js"
+    ]
+  },
   "repository": {
-  "type": "git",
-  "url": "git+https://github.com/rifadm817/n8n-nodes-rifad-appsheet.git"
-},
+    "type": "git",
+    "url": "git+https://github.com/rifadm817/n8n-nodes-rifad-appsheet.git"
+  },
   "publishConfig": {
     "access": "public"
   }

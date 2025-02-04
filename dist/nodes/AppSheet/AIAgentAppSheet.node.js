@@ -1,19 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppSheet = void 0;
+exports.AIAgentAppSheet = void 0;
 const n8n_workflow_1 = require("n8n-workflow");
-class AppSheet {
+class AIAgentAppSheet {
     constructor() {
         this.description = {
-            displayName: 'AppSheet',
-            name: 'appSheet',
+            displayName: 'AppSheet (AI Agent Tool)',
+            name: 'aiAgentAppSheet',
             icon: 'file:appsheet.svg',
-            group: ['transform'],
+            group: ['aiTools'], // Use a distinct group for AI Agent nodes
             version: 1,
             subtitle: '={{$parameter["operation"]}}',
-            description: 'Interact with the AppSheet API to add, read, update, delete records, or invoke a custom action on table records.',
+            description: 'This node exposes the AppSheet API as a tool for AI agents. It supports the same operations as the standard AppSheet node (create, read, update, delete, and invoke actions) but is intended for use by n8n AI agents.',
             defaults: {
-                name: 'AppSheet',
+                name: 'AI Agent AppSheet',
             },
             inputs: [
                 {
@@ -55,7 +55,6 @@ class AppSheet {
                     displayName: 'Operation',
                     name: 'operation',
                     type: 'options',
-                    noDataExpression: false,
                     options: [
                         { name: 'Create Record', value: 'create' },
                         { name: 'Read Records', value: 'read' },
@@ -64,6 +63,8 @@ class AppSheet {
                         { name: 'Invoke Action', value: 'invoke' },
                     ],
                     default: 'create',
+                    noDataExpression: false, // Allows using expressions for dynamic operation selection.
+                    description: 'Which operation to perform in AppSheet. This can be set dynamically via expressions.',
                 },
                 {
                     displayName: 'Table Name',
@@ -230,16 +231,16 @@ class AppSheet {
                     try {
                         body.Rows = JSON.parse(recordData);
                     }
-                    catch (e) {
-                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON format in Record Data. It must be a JSON array of objects.');
+                    catch (error) {
+                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON format in Record Data. Must be a JSON array of objects.');
                     }
                     body.Action = 'Add';
                     break;
                 }
                 case 'read': {
-                    const selector = this.getNodeParameter('selector', i);
                     body.Action = 'Find';
-                    if (selector && selector.trim() !== '') {
+                    const selector = this.getNodeParameter('selector', i);
+                    if (selector.trim() !== '') {
                         body.Properties = { ...commonProperties, Selector: selector };
                     }
                     else {
@@ -247,8 +248,8 @@ class AppSheet {
                         try {
                             body.Rows = JSON.parse(rowsData);
                         }
-                        catch (e) {
-                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON format in Rows data. It must be a JSON array of objects.');
+                        catch (error) {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON format in Rows. Must be a JSON array of objects.');
                         }
                     }
                     break;
@@ -258,8 +259,8 @@ class AppSheet {
                     try {
                         body.Rows = JSON.parse(updateData);
                     }
-                    catch (e) {
-                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON format in Update Data. It must be a JSON array of objects.');
+                    catch (error) {
+                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON in Update Data. Must be a JSON array of objects.');
                     }
                     body.Action = 'Edit';
                     break;
@@ -269,34 +270,34 @@ class AppSheet {
                     try {
                         body.Rows = JSON.parse(deleteData);
                     }
-                    catch (e) {
-                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON format in Delete Data. It must be a JSON array of objects.');
+                    catch (error) {
+                        throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON in Delete Data. Must be a JSON array of objects.');
                     }
                     body.Action = 'Delete';
                     break;
                 }
                 case 'invoke': {
                     const actionName = this.getNodeParameter('actionName', i);
-                    body.Action = actionName;
-                    const actionProperties = this.getNodeParameter('actionProperties', i);
-                    if (actionProperties && actionProperties.trim() !== '') {
+                    body.Action = actionName || '';
+                    const actionProps = this.getNodeParameter('actionProperties', i);
+                    if (actionProps.trim() !== '') {
                         try {
-                            body.Properties = { ...commonProperties, ...JSON.parse(actionProperties) };
+                            body.Properties = { ...commonProperties, ...JSON.parse(actionProps) };
                         }
-                        catch (e) {
-                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON format in Action Properties. It must be a JSON object.');
+                        catch (error) {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON in Action Properties. Must be a JSON object.');
                         }
                     }
                     else {
                         body.Properties = commonProperties;
                     }
                     const invokeRowsData = this.getNodeParameter('invokeRows', i);
-                    if (invokeRowsData && invokeRowsData.trim() !== '') {
+                    if (invokeRowsData.trim() !== '') {
                         try {
                             body.Rows = JSON.parse(invokeRowsData);
                         }
-                        catch (e) {
-                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON format in Invoke Rows data. It must be a JSON array of objects.');
+                        catch (error) {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), 'Invalid JSON in Invoke Rows. Must be a JSON array of objects.');
                         }
                     }
                     break;
@@ -324,4 +325,4 @@ class AppSheet {
         return [this.helpers.returnJsonArray(returnData)];
     }
 }
-exports.AppSheet = AppSheet;
+exports.AIAgentAppSheet = AIAgentAppSheet;

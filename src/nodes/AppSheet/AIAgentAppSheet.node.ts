@@ -15,18 +15,18 @@ interface AppSheetCredentials {
 	appId: string;
 }
 
-export class AppSheet implements INodeType {
+export class AIAgentAppSheet implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'AppSheet',
-		name: 'appSheet',
+		displayName: 'AppSheet (AI Agent Tool)',
+		name: 'aiAgentAppSheet',
 		icon: 'file:appsheet.svg',
-		group: ['transform'],
+		group: ['aiTools'], // Use a distinct group for AI Agent nodes
 		version: 1,
 		subtitle: '={{$parameter["operation"]}}',
 		description:
-			'Interact with the AppSheet API to add, read, update, delete records, or invoke a custom action on table records.',
+			'This node exposes the AppSheet API as a tool for AI agents. It supports the same operations as the standard AppSheet node (create, read, update, delete, and invoke actions) but is intended for use by n8n AI agents.',
 		defaults: {
-			name: 'AppSheet',
+			name: 'AI Agent AppSheet',
 		},
 		inputs: [
 			{
@@ -68,7 +68,6 @@ export class AppSheet implements INodeType {
 				displayName: 'Operation',
 				name: 'operation',
 				type: 'options',
-				noDataExpression: false,
 				options: [
 					{ name: 'Create Record', value: 'create' },
 					{ name: 'Read Records', value: 'read' },
@@ -77,6 +76,8 @@ export class AppSheet implements INodeType {
 					{ name: 'Invoke Action', value: 'invoke' },
 				],
 				default: 'create',
+				noDataExpression: false, // Allows using expressions for dynamic operation selection.
+				description: 'Which operation to perform in AppSheet. This can be set dynamically via expressions.',
 			},
 			{
 				displayName: 'Table Name',
@@ -232,9 +233,9 @@ export class AppSheet implements INodeType {
 
 		// Common properties for all requests:
 		const commonProperties: IDataObject = {
-			Locale: this.getNodeParameter('locale', 0) as string,
-			Location: this.getNodeParameter('location', 0) as string,
-			Timezone: this.getNodeParameter('timezone', 0) as string,
+			Locale: this.getNodeParameter('locale', 0),
+			Location: this.getNodeParameter('location', 0),
+			Timezone: this.getNodeParameter('timezone', 0),
 		};
 
 		// Retrieve the region parameter:
@@ -254,23 +255,23 @@ export class AppSheet implements INodeType {
 					const recordData = this.getNodeParameter('recordData', i) as string;
 					try {
 						body.Rows = JSON.parse(recordData);
-					} catch (e) {
-						throw new NodeOperationError(this.getNode(), 'Invalid JSON format in Record Data. It must be a JSON array of objects.');
+					} catch (error) {
+						throw new NodeOperationError(this.getNode(), 'Invalid JSON format in Record Data. Must be a JSON array of objects.');
 					}
 					body.Action = 'Add';
 					break;
 				}
 				case 'read': {
-					const selector = this.getNodeParameter('selector', i) as string;
 					body.Action = 'Find';
-					if (selector && selector.trim() !== '') {
+					const selector = this.getNodeParameter('selector', i) as string;
+					if (selector.trim() !== '') {
 						body.Properties = { ...commonProperties, Selector: selector };
 					} else {
 						const rowsData = this.getNodeParameter('rows', i) as string;
 						try {
 							body.Rows = JSON.parse(rowsData);
-						} catch (e) {
-							throw new NodeOperationError(this.getNode(), 'Invalid JSON format in Rows data. It must be a JSON array of objects.');
+						} catch (error) {
+							throw new NodeOperationError(this.getNode(), 'Invalid JSON format in Rows. Must be a JSON array of objects.');
 						}
 					}
 					break;
@@ -279,8 +280,8 @@ export class AppSheet implements INodeType {
 					const updateData = this.getNodeParameter('updateData', i) as string;
 					try {
 						body.Rows = JSON.parse(updateData);
-					} catch (e) {
-						throw new NodeOperationError(this.getNode(), 'Invalid JSON format in Update Data. It must be a JSON array of objects.');
+					} catch (error) {
+						throw new NodeOperationError(this.getNode(), 'Invalid JSON in Update Data. Must be a JSON array of objects.');
 					}
 					body.Action = 'Edit';
 					break;
@@ -289,31 +290,31 @@ export class AppSheet implements INodeType {
 					const deleteData = this.getNodeParameter('deleteData', i) as string;
 					try {
 						body.Rows = JSON.parse(deleteData);
-					} catch (e) {
-						throw new NodeOperationError(this.getNode(), 'Invalid JSON format in Delete Data. It must be a JSON array of objects.');
+					} catch (error) {
+						throw new NodeOperationError(this.getNode(), 'Invalid JSON in Delete Data. Must be a JSON array of objects.');
 					}
 					body.Action = 'Delete';
 					break;
 				}
 				case 'invoke': {
 					const actionName = this.getNodeParameter('actionName', i) as string;
-					body.Action = actionName;
-					const actionProperties = this.getNodeParameter('actionProperties', i) as string;
-					if (actionProperties && actionProperties.trim() !== '') {
+					body.Action = actionName || '';
+					const actionProps = this.getNodeParameter('actionProperties', i) as string;
+					if (actionProps.trim() !== '') {
 						try {
-							body.Properties = { ...commonProperties, ...JSON.parse(actionProperties) };
-						} catch (e) {
-							throw new NodeOperationError(this.getNode(), 'Invalid JSON format in Action Properties. It must be a JSON object.');
+							body.Properties = { ...commonProperties, ...JSON.parse(actionProps) };
+						} catch (error) {
+							throw new NodeOperationError(this.getNode(), 'Invalid JSON in Action Properties. Must be a JSON object.');
 						}
 					} else {
 						body.Properties = commonProperties;
 					}
 					const invokeRowsData = this.getNodeParameter('invokeRows', i) as string;
-					if (invokeRowsData && invokeRowsData.trim() !== '') {
+					if (invokeRowsData.trim() !== '') {
 						try {
 							body.Rows = JSON.parse(invokeRowsData);
-						} catch (e) {
-							throw new NodeOperationError(this.getNode(), 'Invalid JSON format in Invoke Rows data. It must be a JSON array of objects.');
+						} catch (error) {
+							throw new NodeOperationError(this.getNode(), 'Invalid JSON in Invoke Rows. Must be a JSON array of objects.');
 						}
 					}
 					break;
@@ -339,6 +340,7 @@ export class AppSheet implements INodeType {
 				returnData.push(response);
 			}
 		}
+
 		return [this.helpers.returnJsonArray(returnData)];
 	}
 }
