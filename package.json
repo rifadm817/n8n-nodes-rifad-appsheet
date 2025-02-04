@@ -30,9 +30,9 @@
   ]
 },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/yourusername/your-repository.git"
-  },
+  "type": "git",
+  "url": "git+https://github.com/rifadm817/n8n-nodes-rifad-appsheet.git"
+},
   "publishConfig": {
     "access": "public"
   }
