@@ -1,8 +1,8 @@
 {
   "name": "n8n-nodes-rifad-appsheet",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "An n8n community node for interacting with the AppSheet API, including an AI Agent tool node",
-  "main": "dist/nodes/AppSheet/AppSheet.node.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc"
   },
@@ -14,7 +14,7 @@
   ],
   "author": "Mohammed Rifad <rifadm817@gmail.com>",
   "dependencies": {
-    "n8n-workflow": "^1.78.1"
+    "n8n-workflow": "^1.14.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
