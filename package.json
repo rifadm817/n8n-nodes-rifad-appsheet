@@ -1,8 +1,8 @@
 {
   "name": "n8n-nodes-rifad-appsheet",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "An n8n community node for interacting with the AppSheet API, including an AI Agent tool node",
-  "main": "dist/AppSheet.node.js",
+  "main": "dist/nodes/AppSheet/AppSheet.node.js",
   "scripts": {
     "build": "tsc"
   },
